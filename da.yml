@@ -1,0 +1,62 @@
+name: Update DA links
+
+on:
+  schedule:
+    - cron: "30 0,6,10 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Read the DA price monitoring page and save the newest report links
+        run: |
+          curl -fsSL --retry 3 -A "Mozilla/5.0 (compatible; GroceryStashLinkCheck/1.0)" "https://www.da.gov.ph/price-monitoring/" -o page.html
+          python3 - <<'PY'
+          import re, json, urllib.parse, datetime
+          M = ["january","february","march","april","may","june","july","august","september","october","november","december"]
+          base = "https://www.da.gov.ph/price-monitoring/"
+          html = open("page.html", encoding="utf8", errors="ignore").read()
+
+          def parse(u):
+              f = re.sub(r"\.pdf.*$", "", urllib.parse.unquote(u.split("/")[-1]), flags=re.I)
+              m = re.search(r"([A-Za-z]+)[-_ ](\d{1,2})[-_ ]([A-Za-z]+)[-_ ](\d{1,2})[-_ ](\d{4})", f)
+              if m and m.group(1).lower() in M and m.group(3).lower() in M:
+                  key = int(m.group(5))*10000 + (M.index(m.group(3).lower())+1)*100 + int(m.group(4))
+                  return key, "%s %s \u2013 %s %s, %s" % (m.group(1).title(), m.group(2), m.group(3).title(), m.group(4), m.group(5))
+              m = re.search(r"([A-Za-z]+)[-_ ](\d{1,2})(?:[-_ ](\d{1,2}))?[-_ ](\d{4})", f)
+              if not m or m.group(1).lower() not in M:
+                  return None
+              mo = M.index(m.group(1).lower()) + 1
+              key = int(m.group(4))*10000 + mo*100 + int(m.group(3) or m.group(2))
+              rng = m.group(2) + ("\u2013" + m.group(3) if m.group(3) else "")
+              return key, "%s %s, %s" % (m.group(1).title(), rng, m.group(4))
+
+          best = {}
+          for u in re.findall(r"""href=["']([^"']+?\.pdf)["']""", html, flags=re.I):
+              if re.search(r"cigarette|retail-price-range", u, re.I):
+                  continue
+              kind = "wk" if re.search(r"average", u, re.I) else ("dl" if re.search(r"price-index|dpi", u, re.I) else None)
+              p = parse(u)
+              if kind and p and (kind not in best or p[0] > best[kind]["key"]):
+                  best[kind] = {"t": p[1], "u": urllib.parse.urljoin(base, u), "key": p[0]}
+
+          if not best:
+              raise SystemExit("No reports found on the DA page")
+          best["updated"] = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%MZ")
+          json.dump(best, open("da.json", "w", encoding="utf8"), ensure_ascii=False, indent=1)
+          print(json.dumps(best, ensure_ascii=False, indent=1))
+          PY
+          rm -f page.html
+
+      - name: Save da.json if it changed
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git add da.json
+          git diff --cached --quiet || (git commit -m "Update DA links" && git push)
