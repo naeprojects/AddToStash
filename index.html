@@ -46,9 +46,14 @@ label{font-size:12px;color:var(--mu)}
 .bar i{display:block;height:100%;background:var(--ac)}
 .big{font-size:32px;font-weight:600;letter-spacing:-1px}
 .empty{text-align:center;color:var(--mu);padding:40px 10px}
-#sh{position:fixed;inset:0;background:rgba(0,0,0,.4);display:none;z-index:20;align-items:flex-end}
+#sh{position:fixed;inset:0;background:rgba(0,0,0,.4);display:none;z-index:20;align-items:flex-end;padding:calc(18px + env(safe-area-inset-top,0px)) 18px calc(18px + env(safe-area-inset-bottom,0px))}
+#sh .x{float:right;width:34px;height:34px;margin:-4px -4px 6px 10px;border:0;border-radius:50%;background:#ececE6;color:#444;font-size:16px;line-height:34px;padding:0}
+@media (prefers-color-scheme:dark){#sh .x{background:#4a4943;color:#efefe9}}
 #sh.on{display:flex}
-#sh>div{background:var(--sf);width:100%;max-width:640px;margin:auto;border-radius:20px 20px 0 0;padding:18px 18px calc(18px + env(safe-area-inset-bottom,0px));max-height:90%;overflow:auto}
+#sh>div{background:#fff;border:1px solid #dcdcd4;width:100%;max-width:640px;margin:auto;border-radius:20px;padding:18px 18px calc(18px + env(safe-area-inset-bottom,0px));max-height:90%;overflow:auto;box-shadow:0 14px 48px rgba(0,0,0,.28)}
+#sh input,#sh select,#sh textarea{background:#f6f6f2;border-color:#dcdcd4}
+#sh .card{background:#faf9f6}
+@media (prefers-color-scheme:dark){#sh{background:rgba(0,0,0,.55)}#sh>div{background:#33322f;border-color:#53524c;box-shadow:0 14px 48px rgba(0,0,0,.6)}#sh input,#sh select,#sh textarea{background:#262522;border-color:#4a4943}#sh .card{background:#2b2a27;border-color:#4a4943}}
 .chk{width:22px;height:22px;margin:0;accent-color:var(--ac)}
 .seg{display:flex;gap:6px;margin-bottom:12px}.seg button{flex:1}
 .mini{display:grid;grid-template-columns:1fr 72px 28px;gap:6px;align-items:center}
@@ -134,7 +139,7 @@ if(st.length){var s=st.filter(function(i){return i.e}).sort(function(a,b){return
 var un=ulab(x.u);return'<div class="row" style="flex-wrap:wrap"><input type="checkbox" class="chk" data-c="'+x.id+'" '+(x.k?"checked":"")+'><div class="g"><div class="n" style="'+(x.k?"text-decoration:line-through;color:var(--mu)":"")+'">'+esc(x.n)+"</div>"+note+'</div><button class="btn d sm" data-ld="'+x.id+'">✕</button><div style="flex-basis:100%;display:flex;gap:6px;align-items:center;padding-left:32px"><input type="number" inputmode="decimal" step="any" data-lq="'+x.id+'" value="'+qn(x)+'" style="width:62px;margin:0"><select data-lu="'+x.id+'" style="width:90px;margin:0"><option value="item"'+(un=="item"?" selected":"")+'>item</option><option value="kilo"'+(un=="kilo"?" selected":"")+'>kilo</option></select><span class="sub">×</span><input type="number" inputmode="decimal" step="any" data-lp="'+x.id+'" value="'+(x.ap||"")+'" placeholder="₱" style="width:84px;margin:0"><span class="sub">= <b>'+$$((x.ap||0)*qn(x))+"</b></span></div></div>"}).join("")+"</div>";
 if(S.l.some(function(x){return x.k}))h+='<button class="btn g2" id="lc" style="width:100%">Clear checked</button>';return h}
 function market(){var R=(S.ref||[]).slice().sort(function(a,b){return a.n.localeCompare(b.n)});
-var h='<div class="card" style="border-left:3px solid var(--ac);background:linear-gradient(90deg,color-mix(in srgb,var(--ac) 9%,var(--sf)),var(--sf) 60%)"><div style="font-size:12px;letter-spacing:.8px;text-transform:uppercase;color:var(--ac);font-weight:600">DA Price Monitoring</div><div class="sub" style="margin:2px 0 6px">Department of Agriculture · latest reports'+daStatus()+'</div>'+lk("Weekly average retail prices",dw().t+(dw().est?" \u00b7 estimated link":""),dw().u)+lk("Daily price index",dd().t+(dd().est?" \u00b7 estimated link":""),dd().u)+daFoot()+"</div>";
+var h='<div class="card" style="border-left:3px solid var(--ac);background:linear-gradient(90deg,color-mix(in srgb,var(--ac) 9%,var(--sf)),var(--sf) 60%)"><div style="font-size:12px;letter-spacing:.8px;text-transform:uppercase;color:var(--ac);font-weight:600">DA Price Monitoring</div><div class="sub" style="margin:2px 0 6px">Department of Agriculture · latest reports'+daStatus()+'</div>'+lk("Weekly average retail prices",dw().t,dw().u)+lk("Daily price index",dd().t,dd().u)+daFoot()+"</div>";
 h+='<div class="sec k11" style="margin-top:18px"><i></i>My DA reference prices<span>'+R.length+'</span></div><div class="card">'+(R.length?R.map(function(r){var hh=hist(r.n),l=hh[hh.length-1],cm="";if(l&&r.pr){var df=l.pr-r.pr;cm='<div class="sub">You paid '+$$(l.pr)+' <span class="'+(df>0?"up":"dn")+'">'+(df>0?"+":"")+(df/r.pr*100).toFixed(0)+"%</span></div>"}
 return'<div class="row"><div class="g" data-rf="'+r.id+'"><div class="n">'+esc(r.n)+'</div><div class="sub">Per '+ulab(r.u)+" · qty "+(r.q||1)+'</div></div><div class="r" data-rf="'+r.id+'"><div>'+$$(r.pr)+'</div><div class="sub">Est. '+$$(r.pr*(r.q||1))+"</div>"+cm+'</div><button class="btn g2 sm" data-rl="'+r.id+'">+ List</button></div>'}).join(""):'<div class="sub" style="padding:8px 0">Open a report above, then add the DA price of products you buy to compare with what you paid.</div>')+'<button class="btn g2" id="rfa" style="width:100%;margin-top:8px">Add DA reference price</button><div class="sub" style="margin-top:8px">Compare only when the unit matches (per kilo or per item).</div></div>';return h}
 function refForm(id){var x=id?S.ref.find(function(i){return i.id==id}):{n:"",pr:"",u:"kilo",q:1,r:DA.wk.t},ku=ulab(x.u),names=[];S.p.forEach(function(i){if(names.indexOf(i.n)<0)names.push(i.n)});
@@ -149,7 +154,7 @@ function wDefault(){var d=new Date(),e=new Date(d);e.setDate(d.getDate()-((d.get
 return{t:same?MN[em]+" "+s.getDate()+"\u2013"+e.getDate()+", "+y:MN[sm]+" "+s.getDate()+" \u2013 "+MN[em]+" "+e.getDate()+", "+y,u:"https://www.da.gov.ph/wp-content/uploads/"+y+"/"+p2d(em+1)+"/Weekly-Average-Prices-"+(same?MN[em]+"-"+s.getDate()+"-"+e.getDate():MN[sm]+"-"+s.getDate()+"-"+MN[em]+"-"+e.getDate())+"-"+y+".pdf",key:y*10000+(em+1)*100+e.getDate(),est:1}}
 function dw(){var a=S.da&&S.da.wk,b=wDefault();return a&&a.key>=b.key?a:b}
 function dd(){var a=S.da&&S.da.dl,b=dDefault();return a&&a.key>=b.key?a:b}
-function daStatus(){var a=S.da||{};return a.chk?" · auto-updated "+fd(a.chk):" · links estimated from today’s date"}
+function daStatus(){var a=S.da||{};return a.chk?" · auto-updated "+fd(a.chk):""}
 function daFoot(){var a=S.da||{},bad=a.err==tdy();return'<div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;gap:8px"><span class="sub">'+(bad?"Couldn\u2019t refresh from the DA page today"+(a.why?" ("+a.why+")":"")+". Showing the last saved links.":a.chk?"Loaded from the DA page":"Links are estimated from today’s date. Tap Refresh for the exact ones.")+'</span><button class="btn g2 sm" id="dar">Refresh</button></div>'+(bad?'<div class="sub" style="margin-top:6px"><a href="'+DA.page+'" target="_blank" rel="noopener" style="color:var(--ac)">Open the DA page for the newest reports</a></div>':"")}
 function cap(s){return s.charAt(0).toUpperCase()+s.slice(1).toLowerCase()}
 function dparse(u){var f=decodeURIComponent(u.split("/").pop()).replace(/\.pdf.*$/i,""),M="january february march april may june july august september october november december".split(" "),m=f.match(/([A-Za-z]+)[-_ ](\d{1,2})[-_ ]([A-Za-z]+)[-_ ](\d{1,2})[-_ ](\d{4})/);
@@ -216,7 +221,7 @@ if($("la"))$("la").onclick=function(){var v=$("ln").value.trim();if(v){addList(v
 if($("ln"))$("ln").onkeydown=function(e){if(e.key=="Enter")$("la").click()};
 if($("lc"))$("lc").onclick=function(){S.l=S.l.filter(function(x){return!x.k});save();draw()};
 if($("bs"))$("bs").onclick=function(){S.b=Math.max(0,+$("bg").value||0);save();draw()}}
-function open(h){$("shc").innerHTML=h;$("sh").classList.add("on")}
+function open(h){$("shc").innerHTML='<button class="x" id="shx" type="button" aria-label="Close">\u2715</button>'+h;$("shx").onclick=close;$("sh").classList.add("on")}
 function close(){$("sh").classList.remove("on")}
 $("sh").onclick=function(e){if(e.target.id=="sh")close()};
 function opts(sel){return CATS.map(function(c){return"<option"+(c==sel?" selected":"")+">"+c+"</option>"}).join("")}
