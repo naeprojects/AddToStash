@@ -153,7 +153,8 @@ function dDefault(){var d=new Date();d.setDate(d.getDate()-1);var y=d.getFullYea
 function wDefault(){var d=new Date(),e=new Date(d);e.setDate(d.getDate()-((d.getDay()+6)%7)-1);var s=new Date(e);s.setDate(e.getDate()-6);var y=e.getFullYear(),em=e.getMonth(),sm=s.getMonth(),same=sm==em;
 return{t:same?MN[em]+" "+s.getDate()+"\u2013"+e.getDate()+", "+y:MN[sm]+" "+s.getDate()+" \u2013 "+MN[em]+" "+e.getDate()+", "+y,u:"https://www.da.gov.ph/wp-content/uploads/"+y+"/"+p2d(em+1)+"/Weekly-Average-Prices-"+(same?MN[em]+"-"+s.getDate()+"-"+e.getDate():MN[sm]+"-"+s.getDate()+"-"+MN[em]+"-"+e.getDate())+"-"+y+".pdf",key:y*10000+(em+1)*100+e.getDate(),est:1}}
 function dw(){var a=S.da&&S.da.wk,b=wDefault();return a&&a.key>=b.key?a:b}
-function dd(){var a=S.da&&S.da.dl,b=dDefault();return a&&a.key>=b.key?a:b}
+function fixDl(a){if(!a||/Daily-Price-Index-/i.test(a.u))return a;var y=Math.floor(a.key/10000),m=Math.floor(a.key/100)%100,d=a.key%100;return{t:a.t,u:a.u.replace(/[^\/]+$/,"")+"Daily-Price-Index-"+MN[m-1]+"-"+d+"-"+y+".pdf",key:a.key}}
+function dd(){var a=fixDl(S.da&&S.da.dl),b=dDefault();return a&&a.key>=b.key?a:b}
 function daStatus(){var a=S.da||{};return a.chk?" · auto-updated "+fd(a.chk):""}
 function daFoot(){var a=S.da||{},bad=a.err==tdy();return'<div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;gap:8px"><span class="sub">'+(bad?"Couldn\u2019t refresh from the DA page today"+(a.why?" ("+a.why+")":"")+". Showing the last saved links.":a.chk?"Loaded from the DA page":"Links are estimated from today’s date. Tap Refresh for the exact ones.")+'</span><button class="btn g2 sm" id="dar">Refresh</button></div>'+(bad?'<div class="sub" style="margin-top:6px"><a href="'+DA.page+'" target="_blank" rel="noopener" style="color:var(--ac)">Open the DA page for the newest reports</a></div>':"")}
 function cap(s){return s.charAt(0).toUpperCase()+s.slice(1).toLowerCase()}
