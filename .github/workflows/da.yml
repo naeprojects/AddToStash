@@ -14,14 +14,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Read the DA price monitoring page and save the newest report links
+      - name: Read the DA page and save the newest report links
         run: |
-          curl -fsSL --retry 3 -A "Mozilla/5.0 (compatible; GroceryStashLinkCheck/1.0)" "https://www.da.gov.ph/price-monitoring/" -o page.html
+          curl -fsSL --retry 3 -A "Mozilla/5.0 (compatible; GroceryStashLinkCheck/1.0)" https://www.da.gov.ph/price-monitoring/ -o page.html
           python3 - <<'PY'
           import re, json, urllib.parse, datetime
+
           M = ["january","february","march","april","may","june","july","august","september","october","november","december"]
           base = "https://www.da.gov.ph/price-monitoring/"
           html = open("page.html", encoding="utf8", errors="ignore").read()
+
 
           def parse(u):
               f = re.sub(r"\.pdf.*$", "", urllib.parse.unquote(u.split("/")[-1]), flags=re.I)
@@ -37,6 +39,18 @@ jobs:
               rng = m.group(2) + ("\u2013" + m.group(3) if m.group(3) else "")
               return key, "%s %s, %s" % (m.group(1).title(), rng, m.group(4))
 
+
+          def fix_daily(entry):
+              # The DA page sometimes lists the daily report under a different file name
+              # (for example "October-22-2026-DPI-AFC.pdf") that does not open.
+              # The usual name is "Daily-Price-Index-<Month>-<Day>-<Year>.pdf", so use that.
+              if entry and not re.search(r"Daily-Price-Index-", entry["u"], re.I):
+                  k = entry["key"]
+                  y, m, d = k // 10000, (k // 100) % 100, k % 100
+                  entry["alt"] = entry["u"]
+                  entry["u"] = entry["u"].rsplit("/", 1)[0] + "/Daily-Price-Index-%s-%d-%d.pdf" % (M[m-1].title(), d, y)
+
+
           best = {}
           for u in re.findall(r"""href=["']([^"']+?\.pdf)["']""", html, flags=re.I):
               if re.search(r"cigarette|retail-price-range", u, re.I):
@@ -46,9 +60,13 @@ jobs:
               if kind and p and (kind not in best or p[0] > best[kind]["key"]):
                   best[kind] = {"t": p[1], "u": urllib.parse.urljoin(base, u), "key": p[0]}
 
+          if best.get("dl"):
+              fix_daily(best["dl"])
+
           if not best:
               raise SystemExit("No reports found on the DA page")
-          best["updated"] = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%MZ")
+
+          best["updated"] = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%MZ")
           json.dump(best, open("da.json", "w", encoding="utf8"), ensure_ascii=False, indent=1)
           print(json.dumps(best, ensure_ascii=False, indent=1))
           PY
@@ -56,7 +74,7 @@ jobs:
 
       - name: Save da.json if it changed
         run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions@users.noreply.github.com"
+          git config user.name github-actions
+          git config user.email github-actions@users.noreply.github.com
           git add da.json
           git diff --cached --quiet || (git commit -m "Update DA links" && git push)
