@@ -1,6 +1,6 @@
 {
- "name": "Grocery Stash",
- "short_name": "Grocery",
+ "name": "AddToStash",
+ "short_name": "AddToStash",
  "description": "Track grocery prices, expiry dates, and your grocery list.",
  "start_url": "./index.html",
  "scope": "./",
