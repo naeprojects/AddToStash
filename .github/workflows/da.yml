@@ -17,6 +17,7 @@ jobs:
       - name: Read the DA page and save the newest report links
         run: |
           curl -fsSL --retry 3 -A "Mozilla/5.0 (compatible; GroceryStashLinkCheck/1.0)" https://www.da.gov.ph/price-monitoring/ -o page.html
+          curl -fsSL --retry 3 -A "Mozilla/5.0 (compatible; GroceryStashLinkCheck/1.0)" https://calabarzon.da.gov.ph/da-calabarzon-bantay-presyo/ -o cz.html || true
           python3 - <<'PY'
           import re, json, urllib.parse, datetime
 
@@ -60,6 +61,24 @@ jobs:
               if kind and p and (kind not in best or p[0] > best[kind]["key"]):
                   best[kind] = {"t": p[1], "u": urllib.parse.urljoin(base, u), "key": p[0]}
 
+          import os
+          if os.path.exists("cz.html"):
+              czh = open("cz.html", encoding="utf8", errors="ignore").read()
+              bestcz = None
+              for m in re.finditer(r"""<a\b[^>]*href=["'](https://drive\.google\.com/file/d/([A-Za-z0-9_-]{20,})/[^"']*)["'][^>]*>(.*?)</a>""", czh, flags=re.I | re.S):
+                  if m.group(2).lower().startswith("bc1"):
+                      continue
+                  text = re.sub(r"<[^>]*>", "", m.group(3)).replace("&nbsp;", " ").strip()
+                  d = re.search(r"([A-Za-z]+)\s+(\d{1,2}),\s*(\d{4})", text)
+                  if not d or d.group(1).lower() not in M:
+                      continue
+                  mo = M.index(d.group(1).lower()) + 1
+                  key = int(d.group(3))*10000 + mo*100 + int(d.group(2))
+                  if not bestcz or key > bestcz["key"]:
+                      bestcz = {"t": "%s %d, %s" % (d.group(1).title(), int(d.group(2)), d.group(3)), "u": m.group(1), "key": key}
+              if bestcz:
+                  best["cz"] = bestcz
+
           if best.get("dl"):
               fix_daily(best["dl"])
 
@@ -70,7 +89,7 @@ jobs:
           json.dump(best, open("da.json", "w", encoding="utf8"), ensure_ascii=False, indent=1)
           print(json.dumps(best, ensure_ascii=False, indent=1))
           PY
-          rm -f page.html
+          rm -f page.html cz.html
 
       - name: Save da.json if it changed
         run: |
