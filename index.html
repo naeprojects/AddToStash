@@ -194,12 +194,15 @@ function sig(){var c=Object.assign({},S);delete c.da;return JSON.stringify(c)}
 function hasData(){return !!(S.p.length||S.l.length||(S.ref&&S.ref.length)||S.b)}
 function isDirty(){return hasData()&&sig()!==BK.sig}
 function bkName(){return"addtostash-backup-"+tdy()+".json"}
-function markBk(){BK.last=Date.now();BK.sig=sig();bkSave();if(tab=="sum")draw();else hdr()}
-async function doBackup(mode){var txt=JSON.stringify({app:"grocery-stash",v:1,exported:new Date().toISOString(),data:S}),name=bkName(),blob=new Blob([txt],{type:"application/json"});
-if(mode=="share"){try{var f=new File([txt],name.replace(/\.json$/,".txt"),{type:"text/plain"});if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:"AddToStash backup"});markBk();return}}catch(e){if(e&&e.name=="AbortError")return}
-try{if(navigator.share){await navigator.share({title:"AddToStash backup",text:txt});markBk();return}}catch(e){if(e&&e.name=="AbortError")return}
-tell("Sharing isn\u2019t available here, so the backup was saved as a file instead.")}
-var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},4000);markBk()}
+function markBk(sg){BK.last=Date.now();BK.sig=sg||sig();bkSave();if(tab=="sum")draw();else hdr()}
+async function doBackup(mode){var sg=sig(),txt=JSON.stringify({app:"grocery-stash",v:1,exported:new Date().toISOString(),data:S}),name=bkName(),
+done=function(){ask({m:"Did the backup go through?",sub:"Mark it as backed up only if the file was saved or sent.",y:"Yes, backed up",cl:"Not yet",go:function(){markBk(sg)}})};
+if(mode=="share"){var tip=" Tap Back up now, then attach the saved file in Messenger.";
+if(!navigator.share){tell("This browser can\u2019t open the share menu."+tip);return}
+try{var f=new File([txt],name.replace(/\.json$/,".txt"),{type:"text/plain"});
+if(navigator.canShare&&!navigator.canShare({files:[f]})){tell("This browser can\u2019t share files."+tip);return}
+await navigator.share({files:[f]});done()}catch(e){if(e&&e.name=="AbortError")return;tell("Couldn\u2019t share ("+((e&&e.name)||"error")+")."+tip)}return}
+var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([txt],{type:"application/json"}));a.download=name;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},4000);done()}
 function restoreBk(f){var r=new FileReader();r.onload=function(){try{var j=JSON.parse(r.result),d=j&&j.app=="grocery-stash"?j.data:j;if(!d||!Array.isArray(d.p))throw 0;
 var msg=d.p.length+" purchases, "+(d.l||[]).length+" grocery list items"+(j.exported?" \u00b7 backed up "+new Date(j.exported).toLocaleString():"");
 ask({m:"Replace everything with this backup?",sub:msg,y:"Replace",go:function(){try{localStorage.setItem("gs1prev",JSON.stringify(S))}catch(e){}
