@@ -200,7 +200,7 @@ async function doBackup(mode){var sg=sig(),txt=JSON.stringify({app:"grocery-stas
 done=function(){ask({m:"Did the backup go through?",sub:"Mark it as backed up only if the file was saved or sent.",y:"Yes, backed up",cl:"Not yet",go:function(){markBk(sg)}})};
 if(mode=="share"){var tip=" Tap Back up now, then share the saved file from your Files app.";
 if(!navigator.share){tell("This browser can\u2019t open the share menu."+tip);return}
-try{var f=new File([txt],name,{type:"text/plain"});if(navigator.canShare&&!navigator.canShare({files:[f]})){tell("This browser can\u2019t share files."+tip);return}await navigator.share({files:[f]});done()}catch(e){if(e&&e.name=="AbortError")return;tell("Couldn\u2019t share ("+((e&&e.name)||"error")+")."+tip)}return}
+try{var f=new File([txt],name,{type:"text/plain"});if(navigator.canShare&&!navigator.canShare({files:[f]})){tell("This browser can\u2019t share files."+tip);return}await navigator.share({files:[f],text:"AddToStash backup, "+new Date().toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"})});done()}catch(e){if(e&&e.name=="AbortError")return;tell("Couldn\u2019t share ("+((e&&e.name)||"error")+")."+tip)}return}
 var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([txt],{type:"text/plain"}));a.download=name;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},4000);done()}
 function restoreBk(f){var r=new FileReader();r.onload=function(){restoreText(String(r.result))};r.readAsText(f)}
 function restoreText(t){try{var j=JSON.parse(t.replace(/^\uFEFF/,"").trim()),d=j&&j.app=="grocery-stash"?j.data:j;if(!d||!Array.isArray(d.p))throw 0;
