@@ -5,14 +5,15 @@
   "key": 20261101
  },
  "dl": {
-  "t": "November 4, 2026",
-  "u": "https://www.da.gov.ph/wp-content/uploads/2026/11/Daily-Price-Index-November-4-2026.pdf",
-  "key": 20261104
+  "t": "November 5, 2026",
+  "u": "https://www.da.gov.ph/wp-content/uploads/2026/11/Daily-Price-Index-November-5-2026.pdf",
+  "key": 20261105,
+  "alt": "https://www.da.gov.ph/wp-content/uploads/2026/11/November-5-2026-DPI-AFC-1.pdf"
  },
  "cz": {
-  "t": "November 4, 2026",
-  "u": "https://drive.google.com/file/d/1HV-wMz8Cn8P8-gw4Rq0c6P3OXcvNnA0M/view?usp=sharing",
-  "key": 20261104
+  "t": "November 5, 2026",
+  "u": "https://drive.google.com/file/d/1iVAdFX_p9K9v51wCJGLcCtmq_zOgiVyG/view?usp=sharing",
+  "key": 20261105
  },
- "updated": "2026-11-05T07:15Z"
+ "updated": "2026-11-05T18:13Z"
 }
