@@ -1,19 +1,18 @@
 {
  "wk": {
-  "t": "November 9–15, 2026",
-  "u": "https://www.da.gov.ph/wp-content/uploads/2026/11/Weekly-Average-Prices-November-9-15-2026.pdf",
-  "key": 20261115
+  "t": "November 16–22, 2026",
+  "u": "https://www.da.gov.ph/wp-content/uploads/2026/11/Weekly-Average-Prices-November-16-22-2026.pdf",
+  "key": 20261122
  },
  "dl": {
-  "t": "November 24, 2026",
-  "u": "https://www.da.gov.ph/wp-content/uploads/2026/11/Daily-Price-Index-November-24-2026.pdf",
-  "key": 20261124,
-  "alt": "https://www.da.gov.ph/wp-content/uploads/2026/11/November-24-2026-DPI-AFC.pdf"
+  "t": "November 25, 2026",
+  "u": "https://www.da.gov.ph/wp-content/uploads/2026/11/Daily-Price-Index-November-25-2026.pdf",
+  "key": 20261125
  },
  "cz": {
   "t": "November 24, 2026",
   "u": "https://drive.google.com/file/d/1Y-A_13E2_hhV--DoY5KbBUD5Ty4bBd_U/view?usp=sharing",
   "key": 20261124
  },
- "updated": "2026-11-24T20:47Z"
+ "updated": "2026-11-25T09:00Z"
 }
